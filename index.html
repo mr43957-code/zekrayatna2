@@ -3,1787 +3,250 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#880e4f">
-    <meta name="description" content="ذكرياتنا - مدوّن المناسبات الرومانسي V3.0">
-    <title>💕 ذكرياتنا V3.0</title>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <title>ذكرياتنا V3.0</title>
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Styles -->
     <link rel="stylesheet" href="styles.css">
+
+    <!-- Environment Config - REPLACE WITH YOUR VALUES -->
+    <script>
+        window.ENV = {
+            SUPABASE_URL: 'https://your-project.supabase.co',
+            SUPABASE_ANON_KEY: 'your-anon-key',
+            GEMINI_API_KEY: 'your-gemini-key'
+        };
+    </script>
 </head>
-<body data-theme="romantic-dark">
-
-
-<!-- ===== AUTH SCREEN — نظام تسجيل دخول كامل ===== -->
-<div class="modern-login-screen" id="modernLoginScreen">
-
-  <!-- Loader -->
-  <div class="modern-loader-container" id="modernLoader">
-    <div class="modern-heart-loader">
-      <svg viewBox="0 0 100 100">
-        <path d="M50 88 L20 58 Q5 43 20 28 Q35 13 50 28 Q65 13 80 28 Q95 43 80 58 L50 88"
-              fill="none" stroke="#e91e63" stroke-width="3"
-              stroke-linecap="round" stroke-linejoin="round"
-              stroke-dasharray="200" stroke-dashoffset="200">
-          <animate attributeName="stroke-dashoffset" from="200" to="0" dur="2s" fill="freeze" repeatCount="1"/>
-          <animate attributeName="fill" from="rgba(233,30,99,0)" to="rgba(233,30,99,0.2)" dur="1s" begin="1s" fill="freeze"/>
-        </path>
-      </svg>
-    </div>
-    <div class="modern-loader-text">جاري تجهيز الذكريات...</div>
-  </div>
-
-  <!-- Login Container -->
-  <div class="modern-login-container" id="modernLoginContainer">
-
-    <!-- LEFT — Branding -->
-    <div class="modern-login-left">
-      <div class="modern-left-content">
-        <div class="modern-brand-icon">💕</div>
-        <h1>ذكرياتنا</h1>
-        <p>تطبيق يجمع أحلى لحظاتك مع شريك حياتك<br>ذكريات، صور، رسائل، وألعاب تفاعلية</p>
-        <div class="modern-features">
-          <div class="modern-feature-item"><i class="fas fa-heart"></i><span>سجل كل لحظاتك المميزة</span></div>
-          <div class="modern-feature-item"><i class="fas fa-images"></i><span>صور وفيديوهات وتدوينات</span></div>
-          <div class="modern-feature-item"><i class="fas fa-gamepad"></i><span>ألعاب وتحديات يومية</span></div>
-          <div class="modern-feature-item"><i class="fas fa-link"></i><span>ربط الشريكين ببعض 💑</span></div>
-        </div>
-      </div>
-      <div class="modern-floating-hearts" id="floatingHearts"></div>
-    </div>
-
-    <!-- RIGHT — Auth Tabs -->
-    <div class="modern-login-right">
-      <div class="modern-login-form" style="width:100%;max-width:420px;">
-
-        <!-- رسالة نجاح عامة -->
-        <div id="authGlobalMessage" style="display:none;padding:12px 15px;border-radius:12px;margin-bottom:18px;background:rgba(76,175,80,0.15);border:1px solid rgba(76,175,80,0.3);color:#4caf50;font-size:0.9rem;text-align:center;"></div>
-
-        <!-- Tabs -->
-        <div style="display:flex;gap:5px;margin-bottom:22px;background:rgba(255,255,255,0.05);padding:5px;border-radius:14px;">
-          <button id="authTabBtn_login"  onclick="authSwitchTab('login')"  style="flex:1;padding:9px 5px;border:none;border-radius:10px;font-family:'Tajawal';font-size:0.85rem;cursor:pointer;transition:all 0.3s;background:linear-gradient(135deg,#e91e63,#c2185b);color:#fff;font-weight:700;">دخول</button>
-          <button id="authTabBtn_signup" onclick="authSwitchTab('signup')" style="flex:1;padding:9px 5px;border:none;border-radius:10px;font-family:'Tajawal';font-size:0.85rem;cursor:pointer;transition:all 0.3s;background:transparent;color:rgba(255,255,255,0.5);">حساب جديد</button>
-          <button id="authTabBtn_reset"  onclick="authSwitchTab('reset')"  style="flex:1;padding:9px 5px;border:none;border-radius:10px;font-family:'Tajawal';font-size:0.85rem;cursor:pointer;transition:all 0.3s;background:transparent;color:rgba(255,255,255,0.5);">نسيت؟</button>
-        </div>
-
-        <!-- ── TAB: Login ── -->
-        <div id="authTab_login">
-          <h2 style="font-size:1.5rem;margin-bottom:4px;">مرحباً بعودتك 👋</h2>
-          <p style="color:rgba(255,255,255,0.5);margin-bottom:22px;font-size:0.88rem;">سجل دخولك لتصفح ذكرياتك</p>
-          <div class="modern-input-group">
-            <label>البريد الإلكتروني</label>
-            <div class="modern-input-wrapper">
-              <input type="email" id="authLoginEmail" placeholder="example@email.com" autocomplete="email" onkeypress="if(event.key==='Enter')authSignIn()">
-              <i class="fas fa-envelope modern-input-icon"></i>
-            </div>
-          </div>
-          <div class="modern-input-group" style="margin-top:14px;">
-            <label>كلمة المرور</label>
-            <div class="modern-input-wrapper">
-              <input type="password" id="authLoginPassword" placeholder="••••••••" autocomplete="current-password" onkeypress="if(event.key==='Enter')authSignIn()">
-              <i class="fas fa-lock modern-input-icon"></i>
-              <button type="button" class="modern-toggle-password" onclick="var i=this.previousElementSibling.previousElementSibling;i.type=i.type==='password'?'text':'password';this.querySelector('i').className=i.type==='password'?'fas fa-eye':'fas fa-eye-slash'">
-                <i class="fas fa-eye"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- ── TAB: Sign Up ── -->
-        <div id="authTab_signup" style="display:none;">
-          <h2 style="font-size:1.5rem;margin-bottom:4px;">أنشئ حسابك 💕</h2>
-          <p style="color:rgba(255,255,255,0.5);margin-bottom:22px;font-size:0.88rem;">ابدأ رحلة التوثيق مع شريكك</p>
-          <div class="modern-input-group">
-            <label>اسمك</label>
-            <div class="modern-input-wrapper">
-              <input type="text" id="authSignUpName" placeholder="محمد / سارة">
-              <i class="fas fa-user modern-input-icon"></i>
-            </div>
-          </div>
-          <div class="modern-input-group" style="margin-top:14px;">
-            <label>البريد الإلكتروني</label>
-            <div class="modern-input-wrapper">
-              <input type="email" id="authSignUpEmail" placeholder="example@email.com" autocomplete="email">
-              <i class="fas fa-envelope modern-input-icon"></i>
-            </div>
-          </div>
-          <div class="modern-input-group" style="margin-top:14px;">
-            <label>كلمة المرور (6 أحرف على الأقل)</label>
-            <div class="modern-input-wrapper">
-              <input type="password" id="authSignUpPassword" placeholder="••••••••" autocomplete="new-password">
-              <i class="fas fa-lock modern-input-icon"></i>
-            </div>
-          </div>
-          <div class="modern-input-group" style="margin-top:14px;">
-            <label>تأكيد كلمة المرور</label>
-            <div class="modern-input-wrapper">
-              <input type="password" id="authSignUpConfirm" placeholder="أعد كتابة كلمة المرور" autocomplete="new-password" onkeypress="if(event.key==='Enter')authSignUp()">
-              <i class="fas fa-lock modern-input-icon"></i>
-            </div>
-          </div>
-        </div>
-
-        <!-- ── TAB: Reset ── -->
-        <div id="authTab_reset" style="display:none;">
-          <h2 style="font-size:1.5rem;margin-bottom:4px;">استعادة كلمة المرور 🔑</h2>
-          <p style="color:rgba(255,255,255,0.5);margin-bottom:22px;font-size:0.88rem;">سنرسل لك رابط إعادة التعيين</p>
-          <div class="modern-input-group">
-            <label>البريد الإلكتروني</label>
-            <div class="modern-input-wrapper">
-              <input type="email" id="authResetEmail" placeholder="example@email.com" onkeypress="if(event.key==='Enter')authResetPassword()">
-              <i class="fas fa-envelope modern-input-icon"></i>
-            </div>
-          </div>
-        </div>
-
-        <!-- رسالة الخطأ -->
-        <div id="authErrorMsg" class="modern-error-message" style="display:none;margin-top:14px;">
-          <i class="fas fa-exclamation-circle"></i>
-          <span></span>
-        </div>
-
-        <!-- زر Submit -->
-        <button class="modern-login-button" id="authSubmitBtn"
-                data-label='<i class="fas fa-sign-in-alt"></i> دخول'
-                onclick="authSignIn()" style="margin-top:18px;">
-          <i class="fas fa-sign-in-alt"></i> دخول
-        </button>
-
-      </div>
-    </div>
-  </div>
-</div>
-
-
-<!-- ══════ MODAL: ربط بالشريك ══════ -->
-<div class="modal-overlay" id="linkPartnerModalOverlay">
-  <div class="modal" style="max-width:460px;">
-    <div class="modal-header">
-      <h3><i class="fas fa-link" style="color:var(--gold)"></i> ربط بشريكي 💕</h3>
-      <button class="modal-close" onclick="document.getElementById('linkPartnerModalOverlay').classList.remove('active')"><i class="fas fa-times"></i></button>
-    </div>
-    <div class="modal-body">
-      <!-- كودك -->
-      <div style="background:linear-gradient(135deg,rgba(233,30,99,0.15),rgba(255,215,0,0.08));border-radius:14px;padding:18px;margin-bottom:20px;text-align:center;border:1px solid rgba(255,215,0,0.3);">
-        <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:6px;">كودك الخاص — أرسله لشريكك</p>
-        <p id="myInviteCodeDisplay" style="font-size:2.2rem;font-weight:900;letter-spacing:6px;color:var(--gold);">------</p>
-        <button class="btn btn-secondary btn-sm" onclick="authSendInvite()" style="margin-top:8px;"><i class="fas fa-share-alt"></i> مشاركة</button>
-      </div>
-      <p style="text-align:center;color:var(--text-muted);font-size:0.82rem;margin-bottom:16px;">— أو أدخل كود شريكك —</p>
-      <div class="form-group">
-        <label><i class="fas fa-key" style="color:var(--gold)"></i> كود الشريك (6 أحرف)</label>
-        <input type="text" id="partnerInviteCode" maxlength="6" placeholder="AB3X7K"
-               style="text-transform:uppercase;letter-spacing:4px;font-size:1.3rem;text-align:center;
-                      width:100%;padding:14px;border-radius:12px;border:var(--border);
-                      background:var(--bg-input);color:var(--text-primary);font-family:'Tajawal';outline:none;"
-               oninput="this.value=this.value.toUpperCase()" onkeypress="if(event.key==='Enter')authLinkPartner()">
-      </div>
-      <div id="coupleStatusContainer" style="margin-top:10px;"></div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="document.getElementById('linkPartnerModalOverlay').classList.remove('active')">إلغاء</button>
-      <button class="btn btn-primary" id="linkPartnerBtn" onclick="authLinkPartner()"><i class="fas fa-link"></i> ربط الآن</button>
-    </div>
-  </div>
-</div>
-
-
-<!-- ══════ MODAL: الملف الشخصي ══════ -->
-<div class="modal-overlay" id="profileModalOverlay">
-  <div class="modal" style="max-width:460px;">
-    <div class="modal-header">
-      <h3><i class="fas fa-user-edit" style="color:var(--accent)"></i> الملف الشخصي</h3>
-      <button class="modal-close" onclick="document.getElementById('profileModalOverlay').classList.remove('active')"><i class="fas fa-times"></i></button>
-    </div>
-    <div class="modal-body">
-      <!-- الأفاتار -->
-      <div class="form-group" style="margin-bottom:18px;">
-        <label>الأفاتار</label>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;" id="avatarPicker">
-          <span class="avatar-opt" onclick="_pickAvatar(this,'👤')">👤</span>
-          <span class="avatar-opt" onclick="_pickAvatar(this,'👨')">👨</span>
-          <span class="avatar-opt" onclick="_pickAvatar(this,'👩')">👩</span>
-          <span class="avatar-opt" onclick="_pickAvatar(this,'🧔')">🧔</span>
-          <span class="avatar-opt" onclick="_pickAvatar(this,'👸')">👸</span>
-          <span class="avatar-opt" onclick="_pickAvatar(this,'🤴')">🤴</span>
-          <span class="avatar-opt" onclick="_pickAvatar(this,'🧑')">🧑</span>
-          <span class="avatar-opt" onclick="_pickAvatar(this,'❤️')">❤️</span>
-          <span class="avatar-opt" onclick="_pickAvatar(this,'💫')">💫</span>
-          <span class="avatar-opt" onclick="_pickAvatar(this,'🌹')">🌹</span>
-        </div>
-        <input type="hidden" id="profileAvatar" value="👤">
-      </div>
-      <div class="form-group">
-        <label><i class="fas fa-user"></i> اسمك</label>
-        <input type="text" id="profileName" placeholder="اسمك الكريم" style="width:100%;padding:12px;border-radius:10px;border:var(--border);background:var(--bg-input);color:var(--text-primary);font-family:'Tajawal';outline:none;">
-      </div>
-      <div class="form-group" style="margin-top:14px;">
-        <label><i class="fas fa-calendar-heart"></i> تاريخ بداية علاقتكم (اختياري)</label>
-        <input type="date" id="profileRelStart" style="width:100%;padding:12px;border-radius:10px;border:var(--border);background:var(--bg-input);color:var(--text-primary);font-family:'Tajawal';outline:none;">
-      </div>
-      <!-- بيانات الشريك -->
-      <div id="partnerInfoDisplay" style="display:none;margin-top:18px;padding:14px;background:var(--bg-card);border-radius:12px;border:var(--border);">
-        <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:8px;"><i class="fas fa-heart" style="color:var(--rose)"></i> شريكك:</p>
-        <div style="display:flex;align-items:center;gap:10px;">
-          <span id="partnerInfoAvatar" style="font-size:1.6rem;">👤</span>
-          <div><p id="partnerInfoName" style="font-weight:700;"></p><p id="partnerInfoEmail" style="font-size:0.75rem;color:var(--text-muted);"></p></div>
-        </div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="document.getElementById('profileModalOverlay').classList.remove('active')">إلغاء</button>
-      <button class="btn btn-primary" onclick="authUpdateProfile()"><i class="fas fa-save"></i> حفظ</button>
-    </div>
-  </div>
-</div>
-
-
-    <!-- ===== FOCUS MODE OVERLAY ===== -->
-    <div class="focus-overlay" id="focusOverlay">
-        <button class="focus-close" onclick="closeFocusMode()">
-            <i class="fas fa-times"></i>
-        </button>
-        <div class="focus-content" id="focusContent"></div>
-    </div>
-
-    <!-- ===== IMAGE LIGHTBOX ===== -->
-    <div class="lightbox-overlay" id="lightboxOverlay" onclick="closeLightbox()">
-        <div class="lightbox-content">
-            <img id="lightboxImage" src="" alt="">
-            <button class="lightbox-close" onclick="closeLightbox()">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-    </div>
-
-    <!-- ===== FLOATING HEARTS BG ===== -->
-    <div class="hearts-bg" id="heartsBg"></div>
-
-    <!-- ===== TOAST CONTAINER ===== -->
-    <div class="toast-container" id="toastContainer"></div>
-
-    <!-- ===== UNDO BAR ===== -->
-    <div class="undo-bar" id="undoBar">
-        <span id="undoMessage"></span>
-        <button class="undo-btn" onclick="undoDelete()">
-            <i class="fas fa-undo"></i> تراجع
-        </button>
-        <button class="undo-close" onclick="hideUndo()">
-            <i class="fas fa-times"></i>
-        </button>
-    </div>
-
-    <!-- ===== MODAL ===== -->
-    <div class="modal-overlay" id="modalOverlay">
-        <div class="modal" id="modalContent">
-            <div class="modal-header">
-                <h3 id="modalTitle"></h3>
-                <button class="modal-close" onclick="closeModal()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body" id="modalBody"></div>
-            <div class="modal-footer" id="modalFooter"></div>
-        </div>
-    </div>
-
-    <!-- ====== TIME CAPSULE MODAL ====== -->
-    <div class="modal-overlay" id="capsuleModalOverlay">
-        <div class="modal" style="max-width: 600px;">
-            <div class="modal-header">
-                <h3><i class="fas fa-hourglass-start" style="color:var(--gold)"></i> كبسولة زمن جديدة</h3>
-                <button class="modal-close" onclick="closeCapsuleModal()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="capsuleForm" onsubmit="saveCapsule(event)">
-                    <input type="hidden" id="capsuleId" value="">
-                    
-                    <div class="form-group">
-                        <label><i class="fas fa-heading"></i> عنوان الكبسولة</label>
-                        <input type="text" id="capsuleTitle" placeholder="مثال: رسالة لنفسي بعد سنة" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label><i class="fas fa-calendar"></i> تاريخ الفتح</label>
-                        <input type="date" id="capsuleOpenDate" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label><i class="fas fa-tag"></i> نوع الكبسولة</label>
-                        <select id="capsuleType" onchange="onCapsuleTypeChange()">
-                            <option value="custom">📅 تاريخ مخصص</option>
-                            <option value="year">🎁 تفتح بعد سنة</option>
-                            <option value="five_years">⏳ تفتح بعد 5 سنوات</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label><i class="fas fa-pen-fancy"></i> رسالتك</label>
-                        <textarea id="capsuleMessage" placeholder="اكتب رسالتك للمستقبل..." rows="3"></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label><i class="fas fa-images"></i> صور (اختياري - حد أقصى 5)</label>
-                        <input type="file" id="capsuleImages" accept="image/*" multiple onchange="handleCapsuleImages(event)" style="margin-bottom: 10px;">
-                        <div id="capsuleImagesPreview" style="display: flex; gap: 10px; flex-wrap: wrap;"></div>
-                    </div>
-
-                    <div class="form-group">
-                        <label><i class="fas fa-microphone"></i> تسجيل صوتي (اختياري)</label>
-                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                            <button type="button" class="btn btn-secondary btn-sm" onclick="startCapsuleRecording()" id="capsuleStartRecord">
-                                <i class="fas fa-circle"></i> بدء التسجيل
-                            </button>
-                            <button type="button" class="btn btn-secondary btn-sm" onclick="stopCapsuleRecording()" id="capsuleStopRecord" disabled>
-                                <i class="fas fa-square"></i> إيقاف
-                            </button>
-                        </div>
-                        <div id="capsuleAudioPreview" style="display: none; margin-top: 10px;">
-                            <audio controls style="width: 100%;"></audio>
-                            <button type="button" class="btn-danger btn-sm" onclick="deleteCapsuleAudio()" style="margin-top: 5px;">
-                                <i class="fas fa-trash-alt"></i> حذف التسجيل
-                            </button>
-                        </div>
-                        <input type="hidden" id="capsuleAudio" value="">
-                    </div>
-
-                    <div class="form-group">
-                        <label style="display: flex; align-items: center; gap: 10px;">
-                            <input type="checkbox" id="capsuleNotify" checked>
-                            <i class="fas fa-bell"></i> أرسل إشعار قبل الفتح بيوم
-                        </label>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeCapsuleModal()">إلغاء</button>
-                <button class="btn btn-primary" onclick="saveCapsule()">
-                    <i class="fas fa-save"></i> حفظ الكبسولة
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ====== DIARY ENTRY MODAL ====== -->
-    <div class="modal-overlay" id="diaryModalOverlay">
-        <div class="modal" style="max-width: 800px;">
-            <div class="modal-header">
-                <h3><i class="fas fa-feather" style="color: var(--gold);"></i> <span id="diaryModalTitle">خاطرة جديدة</span></h3>
-                <button class="modal-close" onclick="closeDiaryModal()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="diaryForm" onsubmit="saveDiaryEntry(event)">
-                    <input type="hidden" id="diaryEntryId" value="">
-
-                    <!-- عنوان الخاطرة -->
-                    <div class="form-group">
-                        <label><i class="fas fa-heading"></i> عنوان الخاطرة</label>
-                        <input type="text" id="diaryTitle" placeholder="مثال: أجمل يوم في حياتي" required>
-                    </div>
-
-                    <!-- محرر النص الغني -->
-                    <div class="form-group">
-                        <label><i class="fas fa-pen-fancy"></i> اكتب خاطرك</label>
-                        <div class="rich-editor-toolbar" style="display: flex; gap: 5px; margin-bottom: 8px; flex-wrap: wrap;">
-                            <button type="button" class="btn btn-sm btn-secondary" onclick="formatText('bold')" title="عريض"><i class="fas fa-bold"></i></button>
-                            <button type="button" class="btn btn-sm btn-secondary" onclick="formatText('italic')" title="مائل"><i class="fas fa-italic"></i></button>
-                            <button type="button" class="btn btn-sm btn-secondary" onclick="formatText('underline')" title="تسطير"><i class="fas fa-underline"></i></button>
-                            <select class="filter-select" style="width: auto;" onchange="formatText('fontSize', this.value)">
-                                <option value="">حجم الخط</option>
-                                <option value="1">صغير</option>
-                                <option value="3">وسط</option>
-                                <option value="5">كبير</option>
-                                <option value="7">كبير جداً</option>
-                            </select>
-                            <select class="filter-select" style="width: auto;" onchange="formatText('foreColor', this.value)">
-                                <option value="">لون</option>
-                                <option value="#ff0000">أحمر</option>
-                                <option value="#00ff00">أخضر</option>
-                                <option value="#0000ff">أزرق</option>
-                                <option value="#ffd700">ذهبي</option>
-                                <option value="#e91e63">وردي</option>
-                            </select>
-                            <button type="button" class="btn btn-sm btn-secondary" onclick="insertEmoji()" title="إيموجي"><i class="fas fa-smile"></i></button>
-                        </div>
-                        <div id="diaryContent" contenteditable="true" style="min-height: 200px; padding: 15px; border: var(--border); border-radius: 10px; background: var(--bg-input); color: var(--text-primary); font-family: 'Tajawal'; line-height: 1.8; overflow-y: auto;" placeholder="اكتب ما يجول في خاطرك..."></div>
-                    </div>
-
-                    <!-- وسوم (Tags) -->
-                    <div class="form-group">
-                        <label><i class="fas fa-tags"></i> الوسوم (اختياري)</label>
-                        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px;">
-                            <button type="button" class="btn btn-sm btn-secondary" onclick="toggleTag('حب')">❤️ حب</button>
-                            <button type="button" class="btn btn-sm btn-secondary" onclick="toggleTag('فرح')">😊 فرح</button>
-                            <button type="button" class="btn btn-sm btn-secondary" onclick="toggleTag('حزن')">😢 حزن</button>
-                            <button type="button" class="btn btn-sm btn-secondary" onclick="toggleTag('تأمل')">🧘 تأمل</button>
-                            <button type="button" class="btn btn-sm btn-secondary" onclick="toggleTag('ذكريات')">📸 ذكريات</button>
-                            <button type="button" class="btn btn-sm btn-secondary" onclick="toggleTag('أمل')">✨ أمل</button>
-                        </div>
-                        <div id="selectedTags" style="display: flex; gap: 8px; flex-wrap: wrap; min-height: 30px;"></div>
-                        <input type="hidden" id="diaryTags" value="">
-                    </div>
-
-                    <!-- إرفاق صورة -->
-                    <div class="form-group">
-                        <label><i class="fas fa-image"></i> إرفاق صورة (اختياري)</label>
-                        <input type="file" id="diaryImage" accept="image/*" onchange="handleDiaryImage(event)">
-                        <div id="diaryImagePreview" style="display: none; margin-top: 10px; position: relative; width: fit-content;">
-                            <img src="" style="max-width: 200px; max-height: 150px; border-radius: 8px;">
-                            <button type="button" class="btn-danger btn-sm" onclick="removeDiaryImage()" style="position: absolute; top: -5px; right: -5px;">✕</button>
-                        </div>
-                    </div>
-
-                    <!-- تسجيل صوتي -->
-                    <div class="form-group">
-                        <label><i class="fas fa-microphone"></i> تسجيل صوتي (اختياري)</label>
-                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                            <button type="button" class="btn btn-secondary btn-sm" onclick="startDiaryRecording()" id="diaryStartRecord">
-                                <i class="fas fa-circle"></i> بدء التسجيل
-                            </button>
-                            <button type="button" class="btn btn-secondary btn-sm" onclick="stopDiaryRecording()" id="diaryStopRecord" disabled>
-                                <i class="fas fa-square"></i> إيقاف
-                            </button>
-                        </div>
-                        <div id="diaryAudioPreview" style="display: none; margin-top: 10px;">
-                            <audio controls style="width: 100%;"></audio>
-                            <button type="button" class="btn-danger btn-sm" onclick="removeDiaryAudio()" style="margin-top: 5px;">
-                                <i class="fas fa-trash-alt"></i> حذف التسجيل
-                            </button>
-                        </div>
-                        <input type="hidden" id="diaryAudio" value="">
-                    </div>
-
-                    <!-- حالة المشاعر (اختياري) -->
-                    <div class="form-group">
-                        <label><i class="fas fa-heart"></i> كيف كان مزاجك؟</label>
-                        <select id="diaryMood" class="filter-select">
-                            <option value="">اختر...</option>
-                            <option value="happy">😊 سعيد</option>
-                            <option value="in_love">💕 واقع في الحب</option>
-                            <option value="sad">😢 حزين</option>
-                            <option value="excited">🎉 متحمس</option>
-                            <option value="calm">🧘 هادئ</option>
-                            <option value="grateful">🙏 شاكر</option>
-                        </select>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeDiaryModal()">إلغاء</button>
-                <button class="btn btn-primary" onclick="saveDiaryEntry()">
-                    <i class="fas fa-save"></i> حفظ الخاطرة
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ====== GAME MODAL ====== -->
-    <div class="modal-overlay" id="gameModalOverlay">
-        <div class="modal" style="max-width: 700px;">
-            <div class="modal-header">
-                <h3><i class="fas fa-gamepad" style="color: var(--gold);"></i> <span id="gameModalTitle">اللعبة</span></h3>
-                <button class="modal-close" onclick="closeGameModal()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body" id="gameModalBody" style="min-height: 300px;">
-                <!-- محتوى اللعبة هيظهر هنا -->
-            </div>
-            <div class="modal-footer" id="gameModalFooter">
-                <button class="btn btn-secondary" onclick="closeGameModal()">إغلاق</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ====== ANSWER QUESTION MODAL ====== -->
-    <div class="modal-overlay" id="answerQuestionModalOverlay">
-        <div class="modal" style="max-width: 600px;">
-            <div class="modal-header">
-                <h3><i class="fas fa-pen-fancy" style="color: var(--gold);"></i> <span id="answerModalTitle">أكتب إجابتك</span></h3>
-                <button class="modal-close" onclick="closeAnswerModal()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="answerForm" onsubmit="saveAnswer(event)">
-                    <input type="hidden" id="answerQuestionId" value="">
-                    
-                    <div id="answerQuestionDisplay" style="background: var(--bg-card); border-radius: 12px; padding: 20px; margin-bottom: 20px; text-align: center;">
-                        <span style="font-size: 2rem;" id="answerQuestionIcon">❓</span>
-                        <h4 style="margin-top: 10px;" id="answerQuestionText"></h4>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label><i class="fas fa-heart"></i> إجابتك</label>
-                        <textarea id="answerText" rows="5" placeholder="اكتب إجابتك هنا..." required style="width: 100%; padding: 12px; border-radius: 10px; background: var(--bg-input); border: var(--border); color: var(--text-primary);"></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label style="display: flex; align-items: center; gap: 10px;">
-                            <input type="checkbox" id="answerPrivate" value="private">
-                            <i class="fas fa-lock"></i> إجابة خاصة (فقط أنا أراها)
-                        </label>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeAnswerModal()">إلغاء</button>
-                <button class="btn btn-primary" onclick="saveAnswer()">
-                    <i class="fas fa-save"></i> حفظ الإجابة
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ====== ADD CUSTOM QUESTION MODAL ====== -->
-    <div class="modal-overlay" id="addQuestionModalOverlay">
-        <div class="modal" style="max-width: 500px;">
-            <div class="modal-header">
-                <h3><i class="fas fa-plus-circle" style="color: var(--gold);"></i> أضف سؤالك الخاص</h3>
-                <button class="modal-close" onclick="closeAddQuestionModal()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="customQuestionForm" onsubmit="saveCustomQuestion(event)">
-                    <div class="form-group">
-                        <label><i class="fas fa-question"></i> السؤال</label>
-                        <input type="text" id="customQuestionText" placeholder="اكتب سؤالك هنا..." required style="width: 100%; padding: 12px; border-radius: 10px; background: var(--bg-input); border: var(--border); color: var(--text-primary);">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label><i class="fas fa-tag"></i> التصنيف</label>
-                        <select id="customQuestionCategory" class="filter-select" style="width: 100%;">
-                            <option value="romantic">❤️ عاطفي</option>
-                            <option value="memories">💭 ذكريات</option>
-                            <option value="dreams">✨ أحلام</option>
-                            <option value="fun">🎉 مرح</option>
-                            <option value="deep">🤔 عميق</option>
-                            <option value="relationship">💑 علاقة</option>
-                            <option value="future">🔮 مستقبل</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label><i class="fas fa-smile"></i> أيقونة (اختياري)</label>
-                        <input type="text" id="customQuestionIcon" placeholder="مثال: ❤️" value="❓" style="width: 100%; padding: 12px; border-radius: 10px; background: var(--bg-input); border: var(--border); color: var(--text-primary);">
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeAddQuestionModal()">إلغاء</button>
-                <button class="btn btn-primary" onclick="saveCustomQuestion()">
-                    <i class="fas fa-save"></i> حفظ السؤال
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ====== QUESTION ROUND MODAL ====== -->
-    <div class="modal-overlay" id="questionRoundModalOverlay">
-        <div class="modal" style="max-width: 700px;">
-            <div class="modal-header">
-                <h3><i class="fas fa-layer-group" style="color: var(--gold);"></i> <span id="roundModalTitle">جولة أسئلة</span></h3>
-                <button class="modal-close" onclick="closeRoundModal()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body" id="roundModalBody" style="min-height: 300px;">
-                <!-- محتوى الجولة هيظهر هنا -->
-            </div>
-            <div class="modal-footer" id="roundModalFooter">
-                <button class="btn btn-secondary" onclick="closeRoundModal()">إغلاق</button>
-            </div>
-        </div>
-    </div>
-
-
-    <!-- ===== HEADER ===== -->
-    <header class="header" id="mainHeader">
-        <div class="header-content">
-            <div class="logo" onclick="switchTab('dashboard')">
-                <div class="logo-icon">💕</div>
-                <div class="logo-text">
-                    <h1>ذكرياتنـا</h1>
-                    <p>الإصدار 3.0 المتقدم</p>
-                </div>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo">💕 ذكرياتنا</div>
+            <div class="header-stats">
+                <span id="stat-events">📅 0</span>
+                <span id="stat-upcoming">⏳ 0</span>
+                <span id="stat-days">💑 0 يوم</span>
             </div>
             <div class="header-actions">
-                <div class="header-stats">
-                    <div class="stat-item">
-                        <div class="stat-number" id="statTotal">0</div>
-                        <div class="stat-label">المناسبات</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number" id="statUpcoming">0</div>
-                        <div class="stat-label">قادمة</div>
-                    </div>
-                    <div class="stat-item highlight">
-                        <div class="stat-number" id="statDaysTogether">0</div>
-                        <div class="stat-label">يوم معاً 💕</div>
-
-                    </div>
-                </div>
-                <div class="header-buttons">
-                    <button class="icon-btn" onclick="toggleQuickAdd()" title="إضافة سريعة">
-                        <i class="fas fa-plus"></i>
-                    </button>
-                    <button class="icon-btn" onclick="togglePanic()" title="إخفاء سريع">
-                        <i class="fas fa-eye-slash"></i>
-                    </button>
-                    <button class="icon-btn" onclick="switchTab('settings')" title="الإعدادات">
-                        <i class="fas fa-cog"></i>
-                    </button>
-
-
+                <button id="btn-quick-add" title="إضافة سريعة">➕</button>
+                <button id="btn-panic" title="إخفاء سريع">🚨</button>
+                <button id="btn-sync" title="مزامنة">☁️</button>
+                <div class="user-menu">
+                    <button id="user-avatar" onclick="App.navigateTo('profile')">👤</button>
                 </div>
             </div>
-        </div>
-        <!-- Quick Add Bar -->
-        <div class="quick-add-bar" id="quickAddBar">
-            <input type="text" id="quickName" placeholder="اسم المناسبة...">
-            <input type="date" id="quickDate">
-            <select id="quickCategory">
-                <option value="special">💝 مناسبة خاصة</option>
-                <option value="anniversary">💍 ذكرى زواج</option>
-                <option value="birthday">🎂 عيد ميلاد</option>
-                <option value="romantic">🌹 رومانسية</option>
-                <option value="first">✨ أول مرة</option>
-                <option value="travel">✈️ سفر</option>
-                <option value="religious">🌙 دينية</option>
-                <option value="achievement">🏆 إنجاز</option>
-                <option value="other">📌 أخرى</option>
-            </select>
-            <button class="btn btn-primary btn-sm" onclick="quickAddEvent()">
-                <i class="fas fa-plus"></i> إضافة
+        </header>
+
+        <!-- Main Content -->
+        <main id="main-content">
+            <!-- Login Page -->
+            <div class="page" id="page-login">
+                <div class="auth-container">
+                    <div class="auth-card">
+                        <h1>💕 ذكرياتنا</h1>
+                        <p>تطبيق الأزواج لحفظ الذكريات</p>
+
+                        <div class="auth-tabs">
+                            <button class="auth-tab active" data-tab="login">تسجيل الدخول</button>
+                            <button class="auth-tab" data-tab="register">حساب جديد</button>
+                        </div>
+
+                        <form id="login-form" class="auth-form">
+                            <div class="form-group">
+                                <label>البريد الإلكتروني</label>
+                                <input type="email" name="email" required placeholder="your@email.com">
+                            </div>
+                            <div class="form-group">
+                                <label>كلمة المرور</label>
+                                <input type="password" name="password" required placeholder="••••••••">
+                            </div>
+                            <button type="submit" class="btn-primary">دخول</button>
+                            <a href="#" class="forgot-password" onclick="Auth.resetPassword(document.querySelector('input[name=email]').value)">نسيت كلمة المرور؟</a>
+                        </form>
+
+                        <form id="register-form" class="auth-form hidden">
+                            <div class="form-group">
+                                <label>الاسم</label>
+                                <input type="text" name="name" required placeholder="اسمك">
+                            </div>
+                            <div class="form-group">
+                                <label>البريد الإلكتروني</label>
+                                <input type="email" name="email" required placeholder="your@email.com">
+                            </div>
+                            <div class="form-group">
+                                <label>كلمة المرور</label>
+                                <input type="password" name="password" required placeholder="••••••••" minlength="6">
+                            </div>
+                            <button type="submit" class="btn-primary">إنشاء حساب</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Home Page -->
+            <div class="page hidden" id="page-home">
+                <div id="home-container"></div>
+            </div>
+
+            <!-- Games Page -->
+            <div class="page hidden" id="page-games">
+                <div id="games-container"></div>
+            </div>
+
+            <!-- Questions Page -->
+            <div class="page hidden" id="page-questions">
+                <div id="questions-container"></div>
+            </div>
+
+            <!-- Challenges Page -->
+            <div class="page hidden" id="page-challenges">
+                <div id="challenges-container"></div>
+            </div>
+
+            <!-- Capsules Page -->
+            <div class="page hidden" id="page-capsules">
+                <div id="capsules-container"></div>
+            </div>
+
+            <!-- Diary Page -->
+            <div class="page hidden" id="page-diary">
+                <div id="diary-container"></div>
+            </div>
+
+            <!-- Profile Page -->
+            <div class="page hidden" id="page-profile">
+                <div id="profile-container"></div>
+            </div>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-page="home">
+                <span>🏠</span>
+                <label>الرئيسية</label>
             </button>
-        </div>
-    </header>
-
-    <!-- ===== SMART SUGGESTIONS BAR ===== -->
-    <div class="suggestions-bar" id="suggestionsBar"></div>
-
-    <!-- ===== NAVIGATION TABS ===== -->
-    <nav class="nav-tabs" id="navTabs">
-        <button class="nav-tab active" data-tab="dashboard" onclick="switchTab('dashboard')">
-            <i class="fas fa-home"></i>
-            <span class="tab-text">الرئيسية</span>
-        </button>
-        <button class="nav-tab" data-tab="add" onclick="switchTab('add')">
-            <i class="fas fa-plus-circle"></i>
-            <span class="tab-text">إضافة</span>
-        </button>
-        <button class="nav-tab" data-tab="upcoming" onclick="switchTab('upcoming')">
-            <i class="fas fa-clock"></i>
-            <span class="tab-text">القادمة</span>
-            <span class="tab-badge" id="badgeUpcoming">0</span>
-        </button>
-        <button class="nav-tab" data-tab="past" onclick="switchTab('past')">
-            <i class="fas fa-history"></i>
-            <span class="tab-text">السابقة</span>
-            <span class="tab-badge" id="badgePast">0</span>
-        </button>
-        <button class="nav-tab" data-tab="timeline" onclick="switchTab('timeline')">
-            <i class="fas fa-stream"></i>
-            <span class="tab-text">الخط الزمني</span>
-        </button>
-        <button class="nav-tab" data-tab="favorites" onclick="switchTab('favorites')">
-            <i class="fas fa-heart"></i>
-            <span class="tab-text">المفضّلة</span>
-        </button>
-<button class="nav-tab" data-tab="capsules" onclick="switchTab('capsules')">
-    <i class="fas fa-hourglass-half"></i>
-    <span class="tab-text">كبسولة الزمن</span>
-    <span class="tab-badge" id="badgeCapsules">0</span>
-</button>
-
-<button class="nav-tab" data-tab="diary" onclick="switchTab('diary')">
-    <i class="fas fa-book-open"></i>
-    <span class="tab-text">يومياتي</span>
-    <span class="tab-badge" id="badgeDiary">0</span>
-</button>
-
-<button class="nav-tab" data-tab="gamification" onclick="switchTab('gamification')">
-    <i class="fas fa-trophy"></i>
-    <span class="tab-text">إنجازاتي</span>
-    <span class="tab-badge" id="badgeGamification">0</span>
-</button>
-
-<button class="nav-tab" data-tab="games" onclick="switchTab('games')">
-    <i class="fas fa-dice"></i>
-    <span class="tab-text">ألعابنا</span>
-    <span class="tab-badge" id="badgeGames">0</span>
-</button>
-
-<button class="nav-tab" data-tab="questions" onclick="switchTab('questions')">
-    <i class="fas fa-question-circle"></i>
-    <span class="tab-text">سؤال وجواب</span>
-    <span class="tab-badge" id="badgeQuestions">✨</span>
-</button>
-
-        <button class="nav-tab" data-tab="messages" onclick="switchTab('messages')">
-            <i class="fas fa-envelope-heart"></i>
-            <span class="tab-text">الرسائل</span>
-        </button>
-        <button class="nav-tab" data-tab="gifts" onclick="switchTab('gifts')">
-            <i class="fas fa-gift"></i>
-            <span class="tab-text">الهدايا</span>
-        </button>
-        <button class="nav-tab" data-tab="stats" onclick="switchTab('stats')">
-            <i class="fas fa-chart-bar"></i>
-            <span class="tab-text">الإحصائيات</span>
-        </button>
-        <button class="nav-tab" data-tab="archive" onclick="switchTab('archive')">
-            <i class="fas fa-archive"></i>
-            <span class="tab-text">الأرشيف</span>
-        </button>
-        <button class="nav-tab" data-tab="milestones" onclick="switchTab('milestones')">
-            <i class="fas fa-trophy"></i>
-            <span class="tab-text">الإنجازات</span>
-        </button>
-        <button class="nav-tab" data-tab="settings" onclick="switchTab('settings')">
-            <i class="fas fa-cog"></i>
-            <span class="tab-text">الإعدادات</span>
-        </button>
-    </nav>
-
-    <!-- ===== MAIN CONTENT ===== -->
-    <main class="main-container" id="mainContainer">
-
-        <!-- ====== DASHBOARD ====== -->
-        <div class="panel active" id="panel-dashboard">
-            <div class="love-quote" id="loveQuote">
-                <div class="quote-icon">💌</div>
-                <div class="quote-text" id="quoteText"></div>
-                <div class="quote-author" id="quoteAuthor"></div>
-                <button class="quote-refresh" onclick="newQuote()">
-                    <i class="fas fa-sync-alt"></i> اقتباس جديد
-                </button>
-            </div>
-
-            <div class="next-event-hero" id="nextEventHero"></div>
-
-            <div class="dashboard-grid" id="dashboardStats"></div>
-
-            <div class="section-header">
-                <h3><i class="fas fa-star" style="color:var(--gold)"></i> أجمل 5 ذكريات</h3>
-            </div>
-            <div class="events-grid" id="topMemories"></div>
-
-            <div class="section-header">
-                <h3><i class="fas fa-clock" style="color:var(--accent)"></i> آخر المناسبات</h3>
-                <button class="btn btn-secondary btn-sm" onclick="switchTab('upcoming')">
-                    عرض الكل <i class="fas fa-arrow-left"></i>
-                </button>
-            </div>
-            <div class="events-grid" id="recentEvents"></div>
-        </div>
-
-               <!-- ====== TIME CAPSULE ====== -->
-        <div class="panel" id="panel-capsules">
-            <div class="section-header">
-                <h3><i class="fas fa-hourglass-half" style="color:var(--gold)"></i> كبسولة الزمن</h3>
-                <button class="btn btn-primary btn-sm" onclick="openCapsuleModal()">
-                    <i class="fas fa-plus"></i> إضافة كبسولة
-                </button>
-            </div>
-
-            <!-- إحصائيات سريعة -->
-            <div style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;">
-                <div class="stat-item" style="flex:1; text-align: center;">
-                    <div class="stat-number" id="totalCapsules">0</div>
-                    <div class="stat-label">إجمالي الكبسولات</div>
-                </div>
-                <div class="stat-item" style="flex:1; text-align: center; background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(233,30,99,0.05));">
-                    <div class="stat-number" id="availableCapsules">0</div>
-                    <div class="stat-label">متاحة للفتح</div>
-                </div>
-                <div class="stat-item" style="flex:1; text-align: center;">
-                    <div class="stat-number" id="lockedCapsules">0</div>
-                    <div class="stat-label">مغلقة</div>
-                </div>
-            </div>
-
-            <!-- شريط البحث والفلتر -->
-            <div class="filter-bar" style="margin-bottom: 20px;">
-                <div class="search-box" style="flex:2;">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="capsuleSearch" placeholder="ابحث عن كبسولة..." oninput="renderCapsules()">
-                </div>
-                <select class="filter-select" id="capsuleFilter" onchange="renderCapsules()" style="flex:1;">
-                    <option value="all">📋 جميع الكبسولات</option>
-                    <option value="locked">🔒 المغلقة</option>
-                    <option value="unlocked">🔓 المتاحة</option>
-                    <option value="opened">✅ المفتوحة</option>
-                </select>
-                <select class="filter-select" id="capsuleSort" onchange="renderCapsules()" style="flex:1;">
-                    <option value="newest">🆕 الأحدث</option>
-                    <option value="oldest">📅 الأقدم</option>
-                    <option value="opening">🔜 الأقرب للفتح</option>
-                </select>
-                <button class="btn btn-secondary" onclick="renderCapsules()" style="flex:0.5;">
-                    <i class="fas fa-sync-alt"></i>
-                </button>
-            </div>
-
-            <!-- الكبسولات القادمة -->
-            <div id="upcomingCapsules" style="margin-bottom: 20px;"></div>
-
-            <!-- شبكة الكبسولات -->
-            <div class="events-grid" id="capsulesGrid"></div>
-        </div>
-
-        <!-- ====== DIARY ====== -->
-        <div class="panel" id="panel-diary">
-            <!-- رأس الصفحة -->
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
-                <div>
-                    <h2 style="font-size: 1.5rem; display: flex; align-items: center; gap: 10px;">
-                        <i class="fas fa-book-open" style="color: var(--gold);"></i>
-                        يومياتي وخواطري
-                    </h2>
-                    <p class="text-muted">سجل أفكارك ومشاعرك، ارجع لها في أي وقت</p>
-                </div>
-                <button class="btn btn-primary" onclick="openDiaryEntryModal()">
-                    <i class="fas fa-plus"></i> كتابة جديدة
-                </button>
-            </div>
-
-            <!-- إحصائيات سريعة -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 25px;">
-                <div class="stat-item" style="text-align: center; padding: 15px;">
-                    <div class="stat-number" id="totalEntries">0</div>
-                    <div class="stat-label">إجمالي الخواطر</div>
-                </div>
-                <div class="stat-item" style="text-align: center; padding: 15px;">
-                    <div class="stat-number" id="entriesThisMonth">0</div>
-                    <div class="stat-label">هذا الشهر</div>
-                </div>
-                <div class="stat-item" style="text-align: center; padding: 15px;">
-                    <div class="stat-number" id="entriesWithMedia">0</div>
-                    <div class="stat-label">بوسائط</div>
-                </div>
-            </div>
-
-            <!-- شريط البحث والفلترة -->
-            <div class="filter-bar" style="margin-bottom: 20px; flex-wrap: wrap;">
-                <div class="search-box" style="flex: 2;">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="diarySearch" placeholder="ابحث في خواطرك..." oninput="renderDiaryEntries()">
-                </div>
-                
-                <select class="filter-select" id="diaryFilter" onchange="renderDiaryEntries()" style="flex: 1;">
-                    <option value="all">📋 الكل</option>
-                    <option value="today">اليوم</option>
-                    <option value="week">هذا الأسبوع</option>
-                    <option value="month">هذا الشهر</option>
-                    <option value="year">هذه السنة</option>
-                    <option value="with_media">بوسائط 🖼️</option>
-                </select>
-
-                <select class="filter-select" id="diaryTagFilter" onchange="renderDiaryEntries()" style="flex: 1;">
-                    <option value="all">🏷️ كل الوسوم</option>
-                    <option value="حب">❤️ حب</option>
-                    <option value="فرح">😊 فرح</option>
-                    <option value="حزن">😢 حزن</option>
-                    <option value="تأمل">🧘 تأمل</option>
-                    <option value="ذكريات">📸 ذكريات</option>
-                    <option value="أمل">✨ أمل</option>
-                </select>
-
-                <select class="filter-select" id="diarySort" onchange="renderDiaryEntries()" style="flex: 1;">
-                    <option value="newest">🆕 الأحدث أولاً</option>
-                    <option value="oldest">📅 الأقدم أولاً</option>
-                </select>
-            </div>
-
-            <!-- خاصية "في مثل هذا اليوم" -->
-            <div id="onThisDayContainer" style="margin-bottom: 20px;"></div>
-
-            <!-- شبكة الخواطر -->
-            <div class="diary-grid" id="diaryEntriesGrid"></div>
-        </div>
-
-
-        <!-- ====== GAMIFICATION ====== -->
-        <div class="panel" id="panel-gamification">
-            <!-- رأس الصفحة مع النقاط والمستوى -->
-            <div style="background: linear-gradient(135deg, rgba(233,30,99,0.2), rgba(255,215,0,0.1)); border-radius: 20px; padding: 30px; margin-bottom: 25px; border: 1px solid rgba(255,215,0,0.3);">
-                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
-                    <div>
-                        <h2 style="font-size: 1.8rem; display: flex; align-items: center; gap: 10px;">
-                            <i class="fas fa-crown" style="color: var(--gold);"></i>
-                            مغامرة الحب
-                        </h2>
-                        <p class="text-muted">كل خطوة تقربك لبعضكم أكثر</p>
-                    </div>
-                    <div style="display: flex; gap: 30px;">
-                        <div style="text-align: center;">
-                            <div class="stat-number" id="gamificationPoints" style="font-size: 2.5rem;">0</div>
-                            <div class="stat-label">نقطة حب</div>
-                        </div>
-                        <div style="text-align: center;">
-                            <div class="stat-number" id="gamificationLevel" style="font-size: 2.5rem;">1</div>
-                            <div class="stat-label">المستوى</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- شريط التقدم للمستوى -->
-                <div style="margin-top: 20px;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <span id="currentLevelName" style="font-weight: 600;">بدايات</span>
-                        <span id="nextLevelPoints">500 نقطة للمستوى التالي</span>
-                    </div>
-                    <div class="progress-bar" style="height: 12px;">
-                        <div class="progress-fill" id="levelProgress" style="width: 0%;"></div>
-                    </div>
-                </div>
-
-                <!-- شريط التحديات اليومية -->
-                <div style="display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap;">
-                    <div style="display: flex; align-items: center; gap: 5px;">
-                        <i class="fas fa-fire" style="color: #ff9800;"></i>
-                        <span>تحديات اليوم: <strong id="dailyChallengesCount">0/8</strong></span>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 5px;">
-                        <i class="fas fa-calendar-check" style="color: #4caf50;"></i>
-                        <span>أيام متتالية: <strong id="loginStreak">0</strong></span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- التحديات اليومية -->
-            <div class="section-header">
-                <h3><i class="fas fa-daily" style="color: #ff9800;"></i> تحديات اليوم</h3>
-                <span class="text-muted" id="challengeResetTime">يتجدد غداً</span>
-            </div>
-            <div class="daily-challenges-grid" id="dailyChallenges" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; margin-bottom: 30px;"></div>
-
-            <!-- لوحة المتصدرين للزوجين -->
-            <div class="section-header">
-                <h3><i class="fas fa-ranking-star" style="color: var(--gold);"></i> من الأكثر نشاطاً؟</h3>
-            </div>
-            <div style="background: var(--gradient-card); border-radius: 16px; padding: 20px; margin-bottom: 30px; border: var(--border);">
-                <div style="display: flex; justify-content: space-around; gap: 20px; flex-wrap: wrap;">
-                    <div id="partner1Stats" style="text-align: center; flex: 1; min-width: 200px; padding: 20px; background: rgba(233,30,99,0.1); border-radius: 12px;">
-                        <i class="fas fa-heart" style="font-size: 2rem; color: var(--rose);"></i>
-                        <h4 id="partner1Name" style="margin: 10px 0;">أنت</h4>
-                        <div style="font-size: 1.2rem; font-weight: 700;" id="partner1Points">0</div>
-                        <div class="text-muted">نقطة</div>
-                    </div>
-                    <div style="display: flex; align-items: center;">
-                        <i class="fas fa-vs" style="font-size: 2rem; color: var(--gold);">VS</i>
-                    </div>
-                    <div id="partner2Stats" style="text-align: center; flex: 1; min-width: 200px; padding: 20px; background: rgba(0,188,212,0.1); border-radius: 12px;">
-                        <i class="fas fa-heart" style="font-size: 2rem; color: #00bcd4;"></i>
-                        <h4 id="partner2Name" style="margin: 10px 0;">الشريك</h4>
-                        <div style="font-size: 1.2rem; font-weight: 700;" id="partner2Points">0</div>
-                        <div class="text-muted">نقطة</div>
-                    </div>
-                </div>
-                <div style="margin-top: 20px; text-align: center;" id="leaderboardMessage">
-                    اشترك مع شريكك لبدء المنافسة
-                </div>
-            </div>
-
-            <!-- الإنجازات -->
-            <div class="section-header">
-                <h3><i class="fas fa-trophy" style="color: var(--gold);"></i> إنجازاتي</h3>
-                <span class="text-muted" id="achievementsCount">0/18</span>
-            </div>
-            <div class="achievements-grid" id="achievementsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px;"></div>
-
-            <!-- المكافآت والثيمات المفتوحة -->
-            <div class="section-header" style="margin-top: 30px;">
-                <h3><i class="fas fa-gift" style="color: #4caf50;"></i> المكافآت المفتوحة</h3>
-            </div>
-            <div class="rewards-grid" id="rewardsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;"></div>
-        </div>
-
-        <!-- ====== GAMES ====== -->
-        <div class="panel" id="panel-games">
-            <!-- رأس الصفحة -->
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
-                <div>
-                    <h2 style="font-size: 1.5rem; display: flex; align-items: center; gap: 10px;">
-                        <i class="fas fa-gamepad" style="color: var(--gold);"></i>
-                        ألعابنا التفاعلية
-                    </h2>
-                    <p class="text-muted">ألعاب ممتعة تقوي علاقتكما وتخلق ذكريات جديدة</p>
-                </div>
-                <button class="btn btn-secondary" onclick="showGameHistory()">
-                    <i class="fas fa-history"></i> سجل الألعاب
-                </button>
-            </div>
-
-            <!-- إحصائيات سريعة -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 25px;">
-                <div class="stat-item" style="text-align: center; padding: 15px;">
-                    <div class="stat-number" id="gamesPlayed">0</div>
-                    <div class="stat-label">لعبة لعبتها</div>
-                </div>
-                <div class="stat-item" style="text-align: center; padding: 15px;">
-                    <div class="stat-number" id="gamesWinRate">0%</div>
-                    <div class="stat-label">نسبة معرفتك</div>
-                </div>
-                <div class="stat-item" style="text-align: center; padding: 15px;">
-                    <div class="stat-number" id="gamesFavorite">🎮</div>
-                    <div class="stat-label">اللعبة المفضلة</div>
-                </div>
-            </div>
-
-            <!-- بطاقات الألعاب -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 30px;">
-                <!-- لعبة هل تعرف شريكك؟ -->
-                <div class="game-card" onclick="startGame('know_your_partner')" style="background: linear-gradient(135deg, rgba(233,30,99,0.2), rgba(156,39,176,0.1)); border-radius: 20px; padding: 25px; cursor: pointer; border: 2px solid transparent; transition: all 0.3s; hover: transform: translateY(-5px); hover: border-color: var(--gold);">
-                    <div style="font-size: 3rem; margin-bottom: 15px;">❓</div>
-                    <h3 style="font-size: 1.2rem; margin-bottom: 10px;">هل تعرف شريكك؟</h3>
-                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px;">اختبر معلوماتك عن شريكك وشوف قد إيه تعرفه</p>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <span style="background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 6px;">💡 أسئلة متنوعة</span>
-                        <span style="background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 6px;">📊 تحدي النتائج</span>
-                    </div>
-                </div>
-
-                <!-- لعبة أنا أم أنت -->
-                <div class="game-card" onclick="startGame('who_is_more')" style="background: linear-gradient(135deg, rgba(255,152,0,0.2), rgba(233,30,99,0.1)); border-radius: 20px; padding: 25px; cursor: pointer; border: 2px solid transparent; transition: all 0.3s;">
-                    <div style="font-size: 3rem; margin-bottom: 15px;">⚖️</div>
-                    <h3 style="font-size: 1.2rem; margin-bottom: 10px;">أنا أم أنت؟</h3>
-                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px;">من الأكثر؟ تشاغب، نوم، أكل، غيرة... اكتشفوا مين فيكم</p>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <span style="background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 6px;">🤔 صفات شخصية</span>
-                        <span style="background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 6px;">📈 مقارنات</span>
-                    </div>
-                </div>
-
-                <!-- لعبة نرجع لأول مرة -->
-                <div class="game-card" onclick="startGame('back_to_first')" style="background: linear-gradient(135deg, rgba(76,175,80,0.2), rgba(0,188,212,0.1)); border-radius: 20px; padding: 25px; cursor: pointer; border: 2px solid transparent; transition: all 0.3s;">
-                    <div style="font-size: 3rem; margin-bottom: 15px;">🕰️</div>
-                    <h3 style="font-size: 1.2rem; margin-bottom: 10px;">نرجع لأول مرة</h3>
-                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px;">تذكروا تفاصيل بدايتكم وأول لحظاتكم مع بعض</p>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <span style="background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 6px;">💭 ذكريات</span>
-                        <span style="background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 6px;">❤️ حنين</span>
-                    </div>
-                </div>
-
-                <!-- لعبة بنبني بيتنا -->
-                <div class="game-card" onclick="startGame('build_home')" style="background: linear-gradient(135deg, rgba(63,81,181,0.2), rgba(156,39,176,0.1)); border-radius: 20px; padding: 25px; cursor: pointer; border: 2px solid transparent; transition: all 0.3s;">
-                    <div style="font-size: 3rem; margin-bottom: 15px;">🏠</div>
-                    <h3 style="font-size: 1.2rem; margin-bottom: 10px;">بنبني بيتنا</h3>
-                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px;">اختاروا مع بعض ديكورات وأثاث بيت أحلامكم</p>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <span style="background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 6px;">🏡 ديكور</span>
-                        <span style="background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 6px;">🪑 أثاث</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- آخر النتائج والألعاب -->
-            <div class="section-header">
-                <h3><i class="fas fa-clock-rotate-left"></i> آخر الألعاب</h3>
-            </div>
-            <div id="recentGames" style="background: var(--gradient-card); border-radius: 16px; padding: 20px; border: var(--border);"></div>
-        </div>
-
-        <!-- ====== QUESTIONS ====== -->
-        <div class="panel" id="panel-questions">
-            <!-- رأس الصفحة -->
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
-                <div>
-                    <h2 style="font-size: 1.5rem; display: flex; align-items: center; gap: 10px;">
-                        <i class="fas fa-comments" style="color: var(--gold);"></i>
-                        سؤال وجواب
-                    </h2>
-                    <p class="text-muted">اكتشفوا جوانب جديدة في بعضكم من خلال الأسئلة</p>
-                </div>
-                <button class="btn btn-primary" onclick="startQuestionRound()">
-                    <i class="fas fa-play"></i> جولة أسئلة
-                </button>
-            </div>
-
-            <!-- سؤال اليوم (مميز) -->
-            <div style="background: linear-gradient(135deg, rgba(233,30,99,0.15), rgba(255,215,0,0.1)); border-radius: 20px; padding: 25px; margin-bottom: 25px; border: 1px solid rgba(255,215,0,0.3);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <span style="background: var(--gradient-accent); padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: 700;">
-                        <i class="fas fa-sun"></i> سؤال اليوم
-                    </span>
-                    <span class="text-muted" id="questionOfTheDayTimer">يتجدد بعد 12 ساعة</span>
-                </div>
-                
-                <div id="questionOfTheDay" style="text-align: center;">
-                    <div style="font-size: 3rem; margin-bottom: 10px;" id="questionOfTheDayIcon">❓</div>
-                    <h3 style="font-size: 1.3rem; margin-bottom: 20px;" id="questionOfTheDayText"></h3>
-                    
-                    <div style="display: flex; gap: 10px; justify-content: center;">
-                        <button class="btn btn-primary" onclick="answerQuestionOfTheDay()">
-                            <i class="fas fa-pen"></i> أكتب إجابتي
-                        </button>
-                        <button class="btn btn-secondary" onclick="viewQuestionAnswers('today')">
-                            <i class="fas fa-eye"></i> شوف الإجابات
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- إحصائيات سريعة -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 25px;">
-                <div class="stat-item" style="text-align: center; padding: 15px;">
-                    <div class="stat-number" id="totalQuestionsAnswered">0</div>
-                    <div class="stat-label">سؤال جاوبت عليه</div>
-                </div>
-                <div class="stat-item" style="text-align: center; padding: 15px;">
-                    <div class="stat-number" id="totalQuestionsSaved">0</div>
-                    <div class="stat-label">سؤال محفوظ</div>
-                </div>
-                <div class="stat-item" style="text-align: center; padding: 15px;">
-                    <div class="stat-number" id="totalCustomQuestions">0</div>
-                    <div class="stat-label">أسئلتك الخاصة</div>
-                </div>
-            </div>
-
-            <!-- شريط البحث والفلترة -->
-            <div class="filter-bar" style="margin-bottom: 20px; flex-wrap: wrap;">
-                <div class="search-box" style="flex: 2;">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="questionSearch" placeholder="ابحث في الأسئلة..." oninput="renderQuestions()">
-                </div>
-                
-                <select class="filter-select" id="questionCategoryFilter" onchange="renderQuestions()" style="flex: 1;">
-                    <option value="all">📋 كل الأسئلة</option>
-                    <option value="romantic">❤️ عاطفي</option>
-                    <option value="memories">💭 ذكريات</option>
-                    <option value="dreams">✨ أحلام</option>
-                    <option value="fun">🎉 مرح</option>
-                    <option value="deep">🤔 عميق</option>
-                    <option value="relationship">💑 علاقة</option>
-                    <option value="future">🔮 مستقبل</option>
-                    <option value="custom">📝 أسئلتي الخاصة</option>
-                </select>
-
-                <select class="filter-select" id="questionSort" onchange="renderQuestions()" style="flex: 1;">
-                    <option value="newest">🆕 الأحدث</option>
-                    <option value="popular">⭐ الأكثر إجابة</option>
-                    <option value="random">🎲 عشوائي</option>
-                </select>
-            </div>
-
-            <!-- شبكة الأسئلة -->
-            <div class="questions-grid" id="questionsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; margin-bottom: 20px;"></div>
-
-            <!-- زر إضافة سؤال مخصص -->
-            <div style="text-align: center; margin: 30px 0;">
-                <button class="btn btn-secondary" onclick="openAddQuestionModal()">
-                    <i class="fas fa-plus"></i> أضف سؤالك الخاص
-                </button>
-            </div>
-        </div>
-
-        <!-- ====== ADD EVENT ====== -->
-        <div class="panel" id="panel-add">
-            <div class="form-container">
-                <div class="form-header">
-                    <i class="fas fa-calendar-plus"></i>
-                    <h2 id="formTitle">إضافة مناسبة جديدة</h2>
-                </div>
-                <form id="eventForm" onsubmit="saveEvent(event)">
-                    <input type="hidden" id="editId" value="">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label><i class="fas fa-heading"></i> اسم المناسبة</label>
-                            <input type="text" id="eventName" placeholder="مثال: عيد زواجنا" required>
-                            <div class="duplicate-warning" id="duplicateWarning"></div>
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-calendar"></i> التاريخ</label>
-                            <input type="date" id="eventDate" required>
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-tag"></i> التصنيف</label>
-                            <select id="eventCategory" onchange="onCategoryChange()">
-                                <option value="anniversary">💍 ذكرى زواج</option>
-                                <option value="birthday">🎂 عيد ميلاد</option>
-                                <option value="first">✨ أول مرة</option>
-                                <option value="travel">✈️ سفر</option>
-                                <option value="special">💝 مناسبة خاصة</option>
-                                <option value="religious">🌙 دينية</option>
-                                <option value="achievement">🏆 إنجاز</option>
-                                <option value="romantic">🌹 رومانسية</option>
-                                <option value="other">📌 أخرى</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-repeat"></i> التكرار</label>
-                            <select id="eventRepeat">
-                                <option value="none">مرة واحدة</option>
-                                <option value="yearly">سنوياً</option>
-                                <option value="monthly">شهرياً</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-bell"></i> تنبيه قبل</label>
-                            <select id="eventReminder">
-                                <option value="0">بدون تنبيه</option>
-                                <option value="1" selected>يوم واحد</option>
-                                <option value="3">3 أيام</option>
-                                <option value="7">أسبوع</option>
-                                <option value="30">شهر</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-user-heart"></i> الاسم (للرسائل)</label>
-                            <input type="text" id="eventPersonName" placeholder="اسم الشريك/الشخص">
-                        </div>
-                        <div class="form-group full-width">
-                            <label><i class="fas fa-smile"></i> أيقونة المناسبة</label>
-                            <div class="emoji-picker" id="emojiPicker"></div>
-                        </div>
-<!-- أضف في قسم إضافة مناسبة (panel-add) بعد حقل رفع الصورة الحالي -->
-
-<!-- حقل رفع صور متعددة -->
-<div class="form-group full-width">
-    <label><i class="fas fa-images"></i> صور متعددة (حد أقصى 10)</label>
-    <div class="multi-image-upload-area" id="multiImageUploadArea">
-        <input type="file" id="eventImages" accept="image/*" multiple hidden onchange="handleMultiImageUpload(event)">
-        <div class="upload-placeholder" onclick="document.getElementById('eventImages').click()">
-            <i class="fas fa-cloud-upload-alt"></i>
-            <p>اضغط لاختيار صور متعددة</p>
-            <span>JPG, PNG — حتى 10 صور، 2MB لكل صورة</span>
-        </div>
-        <div class="images-preview-grid" id="imagesPreviewGrid"></div>
-    </div>
-</div>
-
-<!-- حقل رفع فيديو -->
-<div class="form-group full-width">
-    <label><i class="fas fa-video"></i> فيديو قصير (30 ثانية كحد أقصى)</label>
-    <div class="video-upload-area">
-        <input type="file" id="eventVideo" accept="video/*" hidden onchange="handleVideoUpload(event)">
-        <div class="upload-placeholder" onclick="document.getElementById('eventVideo').click()">
-            <i class="fas fa-video"></i>
-            <p>اضغط لاختيار فيديو</p>
-            <span>MP4, WebM — max 30 ثانية، 10MB</span>
-        </div>
-        <div class="video-preview" id="videoPreview" style="display:none;">
-            <video id="videoPlayer" controls></video>
-            <button type="button" class="remove-media" onclick="removeVideo()">
-                <i class="fas fa-times"></i>
+            <button class="nav-item" data-page="games">
+                <span>🎮</span>
+                <label>الألعاب</label>
             </button>
-        </div>
-    </div>
-</div>
-
-<!-- حقل تسجيل صوتي -->
-<div class="form-group full-width">
-    <label><i class="fas fa-microphone"></i> تسجيل مذكرة صوتية</label>
-    <div class="audio-recorder-area">
-        <button type="button" class="btn btn-secondary" id="startRecording" onclick="startAudioRecording()">
-            <i class="fas fa-circle"></i> بدء التسجيل
-        </button>
-        <button type="button" class="btn btn-secondary" id="stopRecording" onclick="stopAudioRecording()" disabled>
-            <i class="fas fa-square"></i> إيقاف
-        </button>
-        <div class="audio-preview-container" id="audioPreviewContainer" style="display:none;">
-            <audio id="audioPreview" controls></audio>
-            <button type="button" class="btn btn-danger btn-sm" onclick="deleteAudioRecording()" title="حذف التسجيل">
-                <i class="fas fa-trash-alt"></i>
+            <button class="nav-item" data-page="questions">
+                <span>❓</span>
+                <label>الأسئلة</label>
             </button>
-        </div>
-        <input type="hidden" id="eventAudio" value="">
-    </div>
-</div>
-</div>                        <div class="form-group full-width">
-                            <label><i class="fas fa-pen-fancy"></i> ملاحظات / ذكريات</label>
-                            <textarea id="eventNotes" placeholder="اكتب ذكرياتك عن هذه المناسبة..." rows="4"></textarea>
-                        </div>
-                    </div>
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i>
-                            <span id="formBtnText">حفظ المناسبة</span>
-                        </button>
-                        <button type="button" class="btn btn-secondary" onclick="resetForm()">
-                            <i class="fas fa-redo"></i> إعادة تعيين
-                        </button>
-                        <button type="button" class="btn btn-secondary" onclick="addToCalendar()" id="calendarBtn" style="display:none;">
-                            <i class="fab fa-google"></i> إضافة للتقويم
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- ====== UPCOMING ====== -->
-        <div class="panel" id="panel-upcoming">
-            <div class="filter-bar">
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="searchUpcoming" placeholder="ابحث..." oninput="renderUpcoming()">
-                </div>
-                <select class="filter-select" id="filterUpcomingCat" onchange="renderUpcoming()">
-                    <option value="all">جميع التصنيفات</option>
-                </select>
-                <select class="filter-select" id="sortUpcoming" onchange="renderUpcoming()">
-                    <option value="nearest">الأقرب أولاً</option>
-                    <option value="farthest">الأبعد أولاً</option>
-                    <option value="name">أبجدياً</option>
-                </select>
-            </div>
-            <div class="events-grid" id="upcomingEvents"></div>
-        </div>
-
-        <!-- ====== PAST ====== -->
-        <div class="panel" id="panel-past">
-            <div class="filter-bar">
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="searchPast" placeholder="ابحث..." oninput="renderPast()">
-                </div>
-                <select class="filter-select" id="filterPastCat" onchange="renderPast()">
-                    <option value="all">جميع التصنيفات</option>
-                </select>
-                <select class="filter-select" id="sortPast" onchange="renderPast()">
-                    <option value="newest">الأحدث أولاً</option>
-                    <option value="oldest">الأقدم أولاً</option>
-                    <option value="name">أبجدياً</option>
-                </select>
-            </div>
-            <div class="events-grid" id="pastEvents"></div>
-        </div>
-
-        <!-- ====== TIMELINE ====== -->
-        <div class="panel" id="panel-timeline">
-            <div class="filter-bar">
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="searchTimeline" placeholder="ابحث في الخط الزمني..." oninput="renderTimeline()">
-                </div>
-            </div>
-            <div class="timeline" id="timelineContainer"></div>
-        </div>
-
-        <!-- ====== FAVORITES ====== -->
-        <div class="panel" id="panel-favorites">
-            <div class="events-grid" id="favoriteEvents"></div>
-        </div>
-
-        <!-- ====== MESSAGES ====== -->
-        <div class="panel" id="panel-messages">
-            <div class="messages-header">
-                <h3><i class="fas fa-envelope-open-text" style="color:var(--accent)"></i> الرسائل الرومانسية</h3>
-                <p class="text-muted">رسائل جاهزة ومخصصة لمناسباتك</p>
-            </div>
-            <div class="messages-controls">
-                <div class="form-group" style="flex:1; min-width:200px;">
-                    <label><i class="fas fa-user"></i> اسم الشريك</label>
-                    <input type="text" id="msgPartnerName" placeholder="اسم الحبيب/ة" oninput="generateMessages()">
-                </div>
-                <div class="form-group" style="flex:1; min-width:200px;">
-                    <label><i class="fas fa-tag"></i> نوع المناسبة</label>
-                    <select id="msgCategory" onchange="generateMessages()">
-                        <option value="general">💕 عام</option>
-                        <option value="anniversary">💍 ذكرى زواج</option>
-                        <option value="birthday">🎂 عيد ميلاد</option>
-                        <option value="romantic">🌹 رومانسية</option>
-                        <option value="miss">💭 اشتياق</option>
-                        <option value="morning">🌅 صباحية</option>
-                        <option value="night">🌙 مسائية</option>
-                        <option value="apology">🕊️ اعتذار</option>
-                    </select>
-                </div>
-                <button class="btn btn-primary btn-sm" onclick="generateMessages()" style="align-self:flex-end;">
-                    <i class="fas fa-magic"></i> توليد رسائل
-                </button>
-            </div>
-            <div class="messages-grid" id="messagesGrid"></div>
-
-            <div class="section-header" style="margin-top:30px;">
-                <h3><i class="fas fa-bookmark" style="color:var(--gold)"></i> الرسائل المحفوظة</h3>
-            </div>
-            <div class="messages-grid" id="savedMessages"></div>
-        </div>
-
-        <!-- ====== GIFTS ====== -->
-        <div class="panel" id="panel-gifts">
-            <div class="gifts-header">
-                <h3><i class="fas fa-gift" style="color:var(--accent)"></i> أفكار الهدايا</h3>
-                <p class="text-muted">اقتراحات مخصصة حسب نوع المناسبة</p>
-            </div>
-            <div class="gifts-controls">
-                <select class="filter-select" id="giftCategory" onchange="renderGiftIdeas()">
-                    <option value="anniversary">💍 ذكرى زواج</option>
-                    <option value="birthday">🎂 عيد ميلاد</option>
-                    <option value="romantic">🌹 رومانسية</option>
-                    <option value="travel">✈️ سفر</option>
-                    <option value="achievement">🏆 إنجاز</option>
-                    <option value="general">💝 عام</option>
-                </select>
-            </div>
-            <div class="gifts-grid" id="giftsGrid"></div>
-
-            <div class="section-header" style="margin-top:30px;">
-                <h3><i class="fas fa-bookmark" style="color:var(--gold)"></i> أفكار محفوظة</h3>
-            </div>
-            <div class="gifts-grid" id="savedGifts"></div>
-        </div>
-
-        <!-- ====== STATISTICS ====== -->
-        <div class="panel" id="panel-stats">
-            <div class="stats-header">
-                <h3><i class="fas fa-chart-pie" style="color:var(--accent)"></i> الإحصائيات المتقدمة</h3>
-            </div>
-            <div class="dashboard-grid" id="advancedStats"></div>
-
-            <div class="section-header">
-                <h3><i class="fas fa-chart-bar" style="color:var(--gold)"></i> توزيع المناسبات حسب الأشهر</h3>
-            </div>
-            <div class="chart-container" id="monthlyChart"></div>
-
-            <div class="section-header">
-                <h3><i class="fas fa-pie-chart" style="color:var(--accent)"></i> توزيع التصنيفات</h3>
-            </div>
-            <div class="chart-container" id="categoryChart"></div>
-        </div>
-
-        <!-- ====== ARCHIVE ====== -->
-        <div class="panel" id="panel-archive">
-            <div class="archive-header">
-                <h3><i class="fas fa-archive" style="color:var(--text-muted)"></i> الأرشيف</h3>
-                <p class="text-muted">المناسبات القديمة التي تم أرشفتها</p>
-            </div>
-            <div class="events-grid" id="archivedEvents"></div>
-        </div>
-
-        <!-- ====== MILESTONES ====== -->
-        <div class="panel" id="panel-milestones">
-            <div class="milestones-header">
-                <h3><i class="fas fa-trophy" style="color:var(--gold)"></i> سجل إنجازات العلاقة</h3>
-                <p class="text-muted">المحطات المهمة في مسيرتكما معاً</p>
-            </div>
-            <div class="relationship-counter" id="relationshipCounter"></div>
-            <div class="milestones-grid" id="milestonesGrid"></div>
-        </div>
-
-        <!-- ====== SETTINGS ====== -->
-        <div class="panel" id="panel-settings">
-            <!-- Theme Settings -->
-            <div class="settings-section">
-                <h3><i class="fas fa-palette" style="color:var(--accent)"></i> المظهر والثيمات</h3>
-                <div class="themes-grid" id="themesGrid"></div>
-            </div>
-
-            <!-- Relationship Settings -->
-            <div class="settings-section">
-                <h3><i class="fas fa-heart" style="color:var(--rose)"></i> إعدادات العلاقة</h3>
-                <div class="form-group">
-                    <label><i class="fas fa-calendar-heart"></i> تاريخ بداية العلاقة</label>
-                    <input type="date" id="relationshipStart" onchange="saveSettings()">
-                </div>
-                <div class="form-group" style="margin-top:12px;">
-                    <label><i class="fas fa-user-heart"></i> اسم الشريك</label>
-                    <input type="text" id="partnerName" placeholder="اسم حبيبك/حبيبتك" onchange="saveSettings()">
-                </div>
-            </div>
-
-            <!-- Partner Linking Section -->
-            <div class="settings-section">
-                <h3><i class="fas fa-link" style="color:var(--gold)"></i> ربط الشريكين 💑</h3>
-                <div id="coupleLinkPanel">
-                    <div style="text-align:center;padding:20px;color:var(--text-muted);">
-                        <i class="fas fa-spinner fa-spin"></i> جاري التحميل...
-                    </div>
-                </div>
-            </div>
-
-            <!-- Security -->
-            <div class="settings-section">
-                <h3><i class="fas fa-shield-alt" style="color:var(--gold)"></i> الحماية</h3>
-                <div class="setting-item">
-                    <div class="setting-info">
-                        <div class="setting-label">رمز الدخول (PIN)</div>
-                        <div class="setting-desc">حماية التطبيق برمز من 4 أرقام</div>
-                    </div>
-                    <button class="btn btn-secondary btn-sm" onclick="openPinSetup()">
-                        <i class="fas fa-key"></i>
-                        <span id="pinStatusText">تعيين</span>
-                    </button>
-                </div>
-                <div class="setting-item">
-                    <div class="setting-info">
-                        <div class="setting-label">إخفاء سريع (Panic Button)</div>
-                        <div class="setting-desc">إخفاء التطبيق فوراً بضغطة واحدة</div>
-                    </div>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="settingPanic" checked onchange="saveSettings()">
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-                <div class="setting-item" id="removePinItem" style="display:none;">
-                    <div class="setting-info">
-                        <div class="setting-label">إزالة رمز الدخول</div>
-                        <div class="setting-desc">إلغاء الحماية بالكامل</div>
-                    </div>
-                    <button class="btn btn-danger btn-sm" onclick="removePin()">
-                        <i class="fas fa-unlock"></i> إزالة
-                    </button>
-                </div>
-            </div>
-
-            <!-- Notification Settings -->
-            <div class="settings-section">
-                <h3><i class="fas fa-bell" style="color:var(--accent)"></i> التنبيهات</h3>
-                <div class="setting-item">
-                    <div class="setting-info">
-                        <div class="setting-label">تنبيهات المتصفح</div>
-                        <div class="setting-desc">إرسال إشعارات عبر Notification API</div>
-                    </div>
-                    <button class="btn btn-secondary btn-sm" onclick="requestNotificationPermission()">
-                        <i class="fas fa-bell"></i> تفعيل
-                    </button>
-                </div>
-                <div class="setting-item">
-                    <div class="setting-info">
-                        <div class="setting-label">التنبيهات الداخلية</div>
-                        <div class="setting-desc">عرض تنبيهات داخل التطبيق</div>
-                    </div>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="settingInternalNotify" checked onchange="saveSettings()">
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-                <div class="setting-item">
-                    <div class="setting-info">
-                        <div class="setting-label">تنبيه افتراضي قبل</div>
-                        <div class="setting-desc">المدة الافتراضية للتنبيه قبل المناسبة</div>
-                    </div>
-                    <select class="filter-select" id="settingDefaultReminder" onchange="saveSettings()">
-                        <option value="1">يوم واحد</option>
-                        <option value="3">3 أيام</option>
-                        <option value="7" selected>أسبوع</option>
-                        <option value="30">شهر</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- Visual Settings -->
-            <div class="settings-section">
-                <h3><i class="fas fa-eye" style="color:var(--primary-light)"></i> العرض</h3>
-                <div class="setting-item">
-                    <div class="setting-info">
-                        <div class="setting-label">القلوب المتطايرة</div>
-                        <div class="setting-desc">عرض قلوب متحركة في الخلفية</div>
-                    </div>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="settingHearts" checked onchange="toggleHearts()">
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-                <div class="setting-item">
-                    <div class="setting-info">
-                        <div class="setting-label">الاقتباسات الرومانسية</div>
-                        <div class="setting-desc">عرض اقتباسات في الصفحة الرئيسية</div>
-                    </div>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="settingQuotes" checked onchange="saveSettings()">
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-                <div class="setting-item">
-                    <div class="setting-info">
-                        <div class="setting-label">الحركات المخفضة</div>
-                        <div class="setting-desc">تقليل الأنيميشن للأداء</div>
-                    </div>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="settingReducedMotion" onchange="toggleReducedMotion()">
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-                <div class="setting-item">
-                    <div class="setting-info">
-                        <div class="setting-label">الأرشفة التلقائية</div>
-                        <div class="setting-desc">أرشفة المناسبات الأقدم من سنة تلقائياً</div>
-                    </div>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="settingAutoArchive" onchange="saveSettings()">
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-            </div>
-
-            <!-- Data Management -->
-            <div class="settings-section">
-                <h3><i class="fas fa-database" style="color:var(--gold)"></i> إدارة البيانات</h3>
-                <div class="setting-item">
-                    <div class="setting-info">
-                        <div class="setting-label">تصدير البيانات</div>
-                        <div class="setting-desc">حفظ جميع البيانات كملف JSON</div>
-                    </div>
-                    <button class="btn btn-secondary btn-sm" onclick="exportData()">
-                        <i class="fas fa-download"></i> تصدير
-                    </button>
-                </div>
-                <div class="setting-item">
-                    <div class="setting-info">
-                        <div class="setting-label">استيراد البيانات</div>
-                        <div class="setting-desc">استيراد من ملف JSON</div>
-                    </div>
-                    <button class="btn btn-secondary btn-sm" onclick="document.getElementById('importFile').click()">
-                        <i class="fas fa-upload"></i> استيراد
-                    </button>
-                    <input type="file" id="importFile" accept=".json" hidden onchange="importData(event)">
-                </div>
-                <div class="setting-item">
-                    <div class="setting-info">
-                        <div class="setting-label">حذف جميع البيانات</div>
-                        <div class="setting-desc">حذف كل شيء نهائياً</div>
-                    </div>
-                    <button class="btn btn-danger btn-sm" onclick="confirmDeleteAll()">
-                        <i class="fas fa-trash-alt"></i> حذف الكل
-                    </button>
-                </div>
-            </div>
-
-            <!-- About -->
-            <div class="settings-section">
-                <h3><i class="fas fa-info-circle" style="color:var(--primary-light)"></i> حول التطبيق</h3>
-                <div style="color:var(--text-muted); line-height:2; font-size:0.9rem;">
-                    <p>💕 <strong style="color:var(--text-primary)">ذكرياتنا</strong> — الإصدار 3.0 المتقدم</p>
-                    <p>صُمم بكل ❤️ لحفظ أجمل اللحظات والذكريات</p>
-                    <p>⌨️ Ctrl+N إضافة | Ctrl+E تصدير | Ctrl+F بحث | Esc إغلاق</p>
-                </div>
-            </div>
-        </div>
-
-<!-- ===== FLOATING AI CHAT BUTTON ===== -->
-<div class="ai-chat-floating-btn" id="aiChatBtn" onclick="toggleAIChat()">
-    <i class="fas fa-robot"></i>
-    <span class="ai-chat-badge" id="aiChatBadge">✨</span>
-</div>
-
-<!-- ===== AI CHAT WINDOW ===== -->
-<div class="ai-chat-window" id="aiChatWindow">
-    <div class="ai-chat-header">
-        <div class="ai-chat-header-info">
-            <i class="fas fa-heart"></i>
-            <span>ذكاء اصطناعي رومانسي</span>
-        </div>
-        <div class="ai-chat-header-actions">
-
-            <button class="ai-chat-close" onclick="toggleAIChat()" title="إغلاق">
-                <i class="fas fa-times"></i>
+            <button class="nav-item" data-page="challenges">
+                <span>🏆</span>
+                <label>الإنجازات</label>
             </button>
-        </div>
-    </div>
-    
-    <div class="ai-chat-messages" id="aiChatMessages">
-        <div class="ai-message">
-            <div class="ai-avatar">
-                <i class="fas fa-robot"></i>
-            </div>
-            <div class="ai-message-content">
-                <p>أهلاً بيك 💕</p>
-                <span class="message-time">الآن</span>
-            </div>
-        </div>
-    </div>
-    
-    <div class="ai-chat-input-area">
-        <div class="ai-quick-actions" id="aiQuickActions">
-        </div>
-        <div class="ai-input-wrapper">
-            <input type="text" id="aiUserInput" placeholder="اكتب رسالتك هنا..." onkeypress="handleChatKeyPress(event)" maxlength="200">
-            <button class="ai-send-btn" onclick="sendUserMessage()">
-                <i class="fas fa-paper-plane"></i>
+            <button class="nav-item" data-page="capsules">
+                <span>⏳</span>
+                <label>الكبسولات</label>
             </button>
+            <button class="nav-item" data-page="diary">
+                <span>📓</span>
+                <label>اليوميات</label>
+            </button>
+            <button class="nav-item" data-page="profile">
+                <span>👤</span>
+                <label>الملف</label>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Modals Container -->
+    <div id="modals-container"></div>
+
+    <!-- Notifications Container -->
+    <div id="notifications-container"></div>
+
+    <!-- AI Chat Widget -->
+    <div class="ai-chat-widget">
+        <button class="ai-chat-toggle" onclick="toggleChat()">🤖</button>
+        <div class="ai-chat-window hidden" id="ai-chat-window">
+            <div class="chat-header">
+                <span>حبيب - المساعد الذكي</span>
+                <button onclick="toggleChat()">✕</button>
+            </div>
+            <div class="chat-messages" id="chat-messages"></div>
+            <div class="chat-input">
+                <input type="text" id="chat-input" placeholder="اكتب رسالتك..." onkeypress="if(event.key==='Enter')sendChatMessage()">
+                <button onclick="sendChatMessage()">إرسال</button>
+            </div>
         </div>
     </div>
-</div>
 
+    <!-- Scripts -->
+    <script src="data/constants.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/notifications.js"></script>
+    <script src="js/sync.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/ui/modals.js"></script>
+    <script src="js/features/profile.js"></script>
+    <script src="js/features/games.js"></script>
+    <script src="js/features/questions.js"></script>
+    <script src="js/features/challenges.js"></script>
+    <script src="js/features/capsules.js"></script>
+    <script src="js/features/diary.js"></script>
+    <script src="js/app.js"></script>
 
-    </main>
+    <script>
+        // AI Chat functions
+        let chatHistory = JSON.parse(localStorage.getItem('chat_history') || '[]');
 
-<!-- إضافة مكتبة Supabase وملف الإعدادات -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase-config.js"></script>
+        function toggleChat() {
+            document.getElementById('ai-chat-window').classList.toggle('hidden');
+        }
 
-<!-- إضافة ملف الشات الذكي المنفصل -->
-<script src="smart-ai-chat.js"></script>
+        function addMessage(text, sender) {
+            const container = document.getElementById('chat-messages');
+            container.innerHTML += `<div class="chat-message ${sender}">${text}</div>`;
+            container.scrollTop = container.scrollHeight;
+        }
 
-<script src="app.js"></script>
+        async function sendChatMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            if (!message) return;
 
-<!-- ✅ ملف إصلاح شامل -->
-<script src="fixes.js"></script>
+            addMessage(message, 'user');
+            input.value = '';
 
-<!-- ✅ نظام المصادقة الكامل -->
-<script src="auth-system.js"></script>
+            try {
+                const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=' + window.ENV.GEMINI_API_KEY, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{
+                                text: CONSTANTS.AI_SYSTEM_PROMPT + '\n\nUser: ' + message
+                            }]
+                        }]
+                    })
+                });
 
-<script>
-// avatar picker helper
-function _pickAvatar(el, emoji) {
-    document.querySelectorAll('.avatar-opt').forEach(e => e.style.background = '');
-    el.style.background = 'rgba(233,30,99,0.3)';
-    el.style.borderRadius = '8px';
-    document.getElementById('profileAvatar').value = emoji;
-}
+                const data = await response.json();
+                const reply = data.candidates[0].content.parts[0].text;
 
-// إظهار كود الدعوة في مودال الربط
-document.addEventListener('DOMContentLoaded', function() {
-    // أضف CSS لأفاتار
-    const st = document.createElement('style');
-    st.textContent = `
-        .avatar-opt { cursor:pointer; font-size:1.6rem; padding:6px; border-radius:8px;
-            transition:background 0.2s; user-select:none; }
-        .avatar-opt:hover { background:rgba(233,30,99,0.2); }
-        ._menu-btn { display:flex; align-items:center; gap:10px; width:100%; padding:10px 12px;
-            background:none; border:none; color:var(--text-primary); cursor:pointer;
-            font-family:'Tajawal'; font-size:0.9rem; border-radius:10px;
-            transition:background 0.2s; text-align:right; }
-        ._menu-btn:hover { background:var(--bg-card-hover); }
-    `;
-    document.head.appendChild(st);
+                addMessage(reply, 'ai');
 
-    // عند فتح مودال الربط — حدّث كود الدعوة
-    const linkModal = document.getElementById('linkPartnerModalOverlay');
-    if (linkModal) {
-        const observer = new MutationObserver(() => {
-            if (linkModal.classList.contains('active')) {
-                const codeEl = document.getElementById('myInviteCodeDisplay');
-                if (codeEl && window.currentProfile?.invite_code) {
-                    codeEl.textContent = window.currentProfile.invite_code;
-                }
-                // نظّف الحالة
-                const container = document.getElementById('coupleStatusContainer');
-                if (container) container.innerHTML = '';
-                const inp = document.getElementById('partnerInviteCode');
-                if (inp) inp.value = '';
+                // Save to history
+                chatHistory.push({ role: 'user', text: message, time: new Date().toISOString() });
+                chatHistory.push({ role: 'ai', text: reply, time: new Date().toISOString() });
+                localStorage.setItem('chat_history', JSON.stringify(chatHistory.slice(-50)));
+
+            } catch (error) {
+                addMessage('عذراً، حدث خطأ في الاتصال. تحقق من مفتاح Gemini API.', 'ai');
             }
-        });
-        observer.observe(linkModal, { attributes: true, attributeFilter: ['class'] });
-    }
+        }
 
-    // عند فتح مودال الملف الشخصي — حدّث بيانات الشريك
-    const profileModal = document.getElementById('profileModalOverlay');
-    if (profileModal) {
-        const observer2 = new MutationObserver(() => {
-            if (profileModal.classList.contains('active') && window.partnerProfile) {
-                const display = document.getElementById('partnerInfoDisplay');
-                const avt     = document.getElementById('partnerInfoAvatar');
-                const name    = document.getElementById('partnerInfoName');
-                const email   = document.getElementById('partnerInfoEmail');
-                if (display) display.style.display = 'block';
-                if (avt)   avt.textContent   = window.partnerProfile.avatar || '👤';
-                if (name)  name.textContent  = window.partnerProfile.name || '';
-                if (email) email.textContent = window.partnerProfile.email || '';
-            }
+        // Load chat history
+        chatHistory.forEach(msg => {
+            if (msg.role === 'user') addMessage(msg.text, 'user');
+            else addMessage(msg.text, 'ai');
         });
-        observer2.observe(profileModal, { attributes: true, attributeFilter: ['class'] });
-    }
-});
-</script>
-
+    </script>
 </body>
 </html>
