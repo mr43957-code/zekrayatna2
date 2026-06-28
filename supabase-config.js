@@ -4,7 +4,7 @@
 
 // تهيئة Supabase
 const SUPABASE_URL = 'https://efvmrdqkodxgoshkkmog.supabase.co'; 
-const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_F4AA-9_-8eP9dD6nLhT-lQ_zOecRA3x'; 
+const SUPABASE_ANON_KEY = 'sb_publishable_F4AA-9_-8eP9dD6nLhT-lQ_zOecRA3x'; 
 
 // إنشاء عميل Supabase
 let supabaseClient = null;
