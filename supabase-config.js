@@ -3,8 +3,8 @@
 // ============================================
 
 // تهيئة Supabase
-const SUPABASE_URL = 'https://uifnadcxnhyjzefjuvsq.supabase.co'; 
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVpZm5hZGN4bmh5anplZmp1dnNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2Mjk2MzQsImV4cCI6MjA4NzIwNTYzNH0.C9rSd2XJJRD9e41gB-iRdUrmCXSmoZXXIT8hiICd5I0'; 
+const SUPABASE_URL = 'https://efvmrdqkodxgoshkkmog.supabase.co'; 
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_F4AA-9_-8eP9dD6nLhT-lQ_zOecRA3x'; 
 
 // إنشاء عميل Supabase
 let supabaseClient = null;
