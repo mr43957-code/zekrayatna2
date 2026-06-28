@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إعداد Supabase - ذكرياتنا</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: linear-gradient(135deg, #0f0c1f 0%, #1a1a2e 50%, #16213e 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            margin: 0;
+        }
+        .setup-container {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #fff, #e91e63);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: rgba(255,255,255,0.8);
+        }
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 10px;
+            color: white;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 1rem;
+        }
+        input:focus {
+            outline: none;
+            border-color: #e91e63;
+        }
+        button {
+            background: linear-gradient(135deg, #e91e63, #c2185b);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(233,30,99,0.4);
+        }
+        .info {
+            background: rgba(233,30,99,0.15);
+            border: 1px solid rgba(233,30,99,0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #ffb3c6;
+        }
+        .info i {
+            color: #e91e63;
+            margin-left: 8px;
+        }
+        .step {
+            margin-bottom: 10px;
+            color: rgba(255,255,255,0.7);
+        }
+        .step span {
+            color: #ffd700;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <div class="setup-container">
+        <h1>🔧 إعداد Supabase</h1>
+        
+        <div class="info">
+            <i class="fas fa-info-circle"></i>
+            اتبع الخطوات التالية لربط التطبيق بقاعدة البيانات
+        </div>
+
+        <div style="margin-bottom: 30px;">
+            <div class="step"><span>1️⃣</span> ادخل على <a href="https://supabase.com" target="_blank" style="color: #ffd700;">supabase.com</a> وأنشئ حساب</div>
+            <div class="step"><span>2️⃣</span> أنشئ مشروع جديد واختر اسم "dhakryatna"</div>
+            <div class="step"><span>3️⃣</span> احفظ كلمة مرور قاعدة البيانات</div>
+            <div class="step"><span>4️⃣</span> من Settings → API، انسخ Project URL و anon key</div>
+            <div class="step"><span>5️⃣</span> أنشئ الجداول التالية في SQL Editor:</div>
+        </div>
+
+        <div class="form-group">
+            <label>🔗 رابط Supabase (Project URL)</label>
+            <input type="text" id="supabaseUrl" placeholder="https://uifnadcxnhyjzefjuvsq.supabase.co" value="https://uifnadcxnhyjzefjuvsq.supabase.co">
+        </div>
+
+        <div class="form-group">
+            <label>🔑 المفتاح العام (anon public key)</label>
+            <input type="text" id="supabaseKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+        </div>
+
+        <div style="margin: 30px 0; background: rgba(0,0,0,0.3); border-radius: 10px; padding: 20px;">
+            <h3 style="color: #ffd700; margin-bottom: 15px;">📋 كود إنشاء الجداول</h3>
+            <pre style="background: #0a0a0a; padding: 15px; border-radius: 8px; overflow-x: auto; color: #4caf50; font-size: 0.8rem; direction: ltr; text-align: left;">
+-- جدول بيانات المناسبات
+CREATE TABLE romantic_events_v3 (
+    partner_id INTEGER PRIMARY KEY,
+    data JSONB NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- جدول الأرشيف
+CREATE TABLE romantic_archive_v3 (
+    partner_id INTEGER PRIMARY KEY,
+    data JSONB NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- جدول الرسائل المحفوظة
+CREATE TABLE romantic_saved_messages (
+    partner_id INTEGER PRIMARY KEY,
+    data JSONB NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- جدول الهدايا المحفوظة
+CREATE TABLE romantic_saved_gifts (
+    partner_id INTEGER PRIMARY KEY,
+    data JSONB NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- جدول الكبسولات الزمنية
+CREATE TABLE romantic_time_capsules_v4 (
+    partner_id INTEGER PRIMARY KEY,
+    data JSONB NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- جدول اليوميات
+CREATE TABLE romantic_diary_v4 (
+    partner_id INTEGER PRIMARY KEY,
+    data JSONB NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- جدول التحديات والإنجازات
+CREATE TABLE romantic_gamification_v4 (
+    partner_id INTEGER PRIMARY KEY,
+    data JSONB NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- جدول الألعاب
+CREATE TABLE romantic_games_v4 (
+    partner_id INTEGER PRIMARY KEY,
+    data JSONB NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- جدول سجل الألعاب
+CREATE TABLE romantic_games_history_v4 (
+    partner_id INTEGER PRIMARY KEY,
+    data JSONB NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- جدول إجابات الأسئلة
+CREATE TABLE romantic_questions_answers_v4 (
+    partner_id INTEGER PRIMARY KEY,
+    data JSONB NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- جدول الأسئلة المخصصة
+CREATE TABLE romantic_custom_questions_v4 (
+    partner_id INTEGER PRIMARY KEY,
+    data JSONB NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- جدول الإعدادات
+CREATE TABLE romantic_settings_v3 (
+    partner_id INTEGER PRIMARY KEY,
+    data JSONB NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- إنشاء المستخدمين الافتراضيين
+-- كلمة مرور الشريك الأول: 1111
+-- كلمة مرور الشريك الثاني: 2222
+            </pre>
+        </div>
+
+        <button onclick="saveSupabaseConfig()">
+            <i class="fas fa-save"></i> حفظ الإعدادات
+        </button>
+
+        <div style="margin-top: 20px; text-align: center;" id="status"></div>
+    </div>
+
+    <script>
+        function saveSupabaseConfig() {
+            const url = document.getElementById('supabaseUrl').value.trim();
+            const key = document.getElementById('supabaseKey').value.trim();
+            const status = document.getElementById('status');
+
+            if (!url || !key) {
+                status.innerHTML = '<span style="color: #f44336;">❌ يرجى إدخال جميع الحقول</span>';
+                return;
+            }
+
+            // حفظ في ملف supabase-config.js
+            const config = `// ============================================\n// SUPABASE CONFIGURATION\n// ============================================\n\nconst SUPABASE_URL = '${url}';\nconst SUPABASE_ANON_KEY = '${key}';\n\nconst supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);`;
+
+            // إنشاء ملف للتحميل
+            const blob = new Blob([config], { type: 'text/javascript' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'supabase-config.js';
+            link.click();
+
+            status.innerHTML = '<span style="color: #4caf50;">✅ تم حفظ الإعدادات! الآن أضف الملف supabase-config.js إلى مشروعك</span>';
+        }
+    </script>
+</body>
+</html>
